@@ -11,18 +11,19 @@ class PltRacket <Formula
   skip_clean 'bin'
 
   def install
-    cd "src"
+    Dir.chdir 'src' do
 
-    args = [ "--disable-debug", "--disable-dependency-tracking",
-             "--enable-xonx", 
-             "--prefix=#{prefix}" ]
+      args = [ "--disable-debug", "--disable-dependency-tracking",
+              "--enable-xonx",
+              "--prefix=#{prefix}" ]
 
-    if Hardware.is_64_bit? && MACOS_VERSION >= 10.6
-      args += ["--enable-mac64", "--enable-sgc", "--disable-gracket"]
-    end    
-    
-    system "./configure", *args
-    system "make"
-    system "make install"
+      if snow_leopard_64?
+        args += ["--enable-mac64", "--enable-sgc", "--disable-gracket"]
+      end
+
+      system "./configure", *args
+      system "make"
+      system "make install"
+    end
   end
 end
