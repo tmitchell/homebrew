@@ -1,17 +1,17 @@
 require 'formula'
 
-class GhostscriptFonts <Formula
+class GhostscriptFonts < Formula
   url 'http://downloads.sourceforge.net/project/gs-fonts/gs-fonts/8.11%20%28base%2035%2C%20GPL%29/ghostscript-fonts-std-8.11.tar.gz'
   homepage 'http://sourceforge.net/projects/gs-fonts/'
   md5 '6865682b095f8c4500c54b285ff05ef6'
 end
 
-class Ghostscript <Formula
-  url 'http://downloads.sourceforge.net/project/ghostscript/GPL%20Ghostscript/8.71/ghostscript-8.71.tar.gz'
+class Ghostscript < Formula
+  url 'http://downloads.ghostscript.com/public/ghostscript-9.02.tar.bz2'
   homepage 'http://www.ghostscript.com/'
-  md5 '51a522a5b4818bd3dc7c1c0e9dd22bad'
+  md5 'f67151444bd56a7904579fc75a083dd6'
 
-  depends_on 'pkg-config'
+  depends_on 'pkg-config' => :build
   depends_on 'jpeg'
   depends_on 'libtiff'
 
@@ -50,14 +50,5 @@ class Ghostscript <Formula
     end
 
     (man+'de').rmtree
-  end
-
-  def caveats
-      <<-EOS.undent
-        There have been reports that installing Ghostscript can break printing on OS X:
-          http://github.com/mxcl/homebrew/issues/issue/528
-
-        If your printing doesn't break, please comment on the issue! Thanks.
-      EOS
   end
 end

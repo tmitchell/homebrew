@@ -1,11 +1,11 @@
 require 'formula'
 
-class Libass <Formula
-  url 'http://libass.googlecode.com/files/libass-0.9.9.tar.bz2'
+class Libass < Formula
+  url 'http://libass.googlecode.com/files/libass-0.9.12.tar.gz'
   homepage 'http://code.google.com/p/libass/'
-  md5 '6f545089d838d524c4f3b12e8ef6ed38'
+  md5 'b5566b0cc5fdb67edbe3bf1d069aaaab'
 
-  depends_on 'pkg-config'
+  depends_on 'pkg-config' => :build
 
   def install
     system "./configure", "--disable-debug", "--disable-dependency-tracking", "--prefix=#{prefix}"

@@ -1,5 +1,4 @@
 require 'formula'
-require 'brew.h'
 
 class GfortranPkgDownloadStrategy <CurlDownloadStrategy
   def stage
@@ -15,9 +14,8 @@ class GfortranPkgDownloadStrategy <CurlDownloadStrategy
   end
 end
 
-class Gfortran <Formula
-  if MACOS_VERSION < 10.6
-    # Leopard
+class Gfortran < Formula
+  if MacOS.leopard?
     url 'http://r.research.att.com/gfortran-42-5577.pkg'
     md5 '30fb495c93cf514003cdfcb7846dc701'
     version "4.2.4-5577"
@@ -29,11 +27,9 @@ class Gfortran <Formula
       md5 '71bd546baa45c9c0fb4943cdd72ee274'
       version "4.2.4-5659"
     else
-      # These links should be updated to point to gfortran
-      # binaries for XCode build 5664 when they appear.
-      url 'http://r.research.att.com/gfortran-42-5659.pkg'
-      md5 '71bd546baa45c9c0fb4943cdd72ee274'
-      version "4.2.4-5659"
+      url 'http://r.research.att.com/gfortran-42-5664.pkg'
+      md5 'eb64ba9f8507da22e582814a69fbb7ca'
+      version "4.2.4-5664"
     end
   end
 
@@ -63,39 +59,37 @@ class Gfortran <Formula
       safe_system "pax --insecure -rz -f Payload.gz -s ',./usr,#{prefix},'"
       safe_system "ln -sf #{man1}/gfortran-4.2.1 #{man1}/gfortran.1"
     when 5664
-      # This section should be updated when binaries for 5664 appear.
-      ohai "Installing gfortran 4.2.4 for XCode 3.2.2 (build 5659)"
+      ohai "Installing gfortran 4.2.4 for XCode 3.2.3 (build 5664)"
+      safe_system "pax --insecure -rz -f Payload.gz -s ',./usr,#{prefix},'"
+      safe_system "ln -sf #{man1}/gfortran-4.2.1 #{man1}/gfortran.1"
+    when 5666
+      ohai "Installing gfortran 4.2.4 for XCode 4.0 (build 5666)"
       safe_system "pax --insecure -rz -f Payload.gz -s ',./usr,#{prefix},'"
       safe_system "ln -sf #{man1}/gfortran-4.2.1 #{man1}/gfortran.1"
     else
       onoe <<-EOS.undent
         Currently the gfortran compiler provided by this brew is only supported
         for XCode 3.1.4 on OS X 10.5.x and XCode 3.2.2/3.2.3 on OS X 10.6.x
+
+        Software update can help upgrade your copy of XCode.  The latest version
+        of XCode is also available from:
+
+            http://developer.apple.com/technologies/xcode.html
       EOS
     end
   end
 
-  def caveats
-    caveats = <<-EOS
-Fortran compiler support in brews is currently experimental.  One of the
-consequences of this is that Homebrew does not set environment flags to ensure
-that a particular Fortran compiler is used and that the resulting code is
-optimized properly.  Therefore, in addition to using:
+  def caveats; <<-EOS.undent
+    Brews that require a Fortran compiler should not use:
+      depends_on 'gfortran'
 
-    depends_on "gfortran"
+    The preferred method of declaring Fortran support is to use:
+      def install
+        ...
+        ENV.fortran
+        ...
+      end
 
-Fortran-based brews should also specify environment variables for the Fortran
-compiler in the install section:
-
-    # Select the Fortran compiler to be used:
-    ENV["FC"] = ENV["F77"] "\#{HOMEBREW_PREFIX}/bin/gfortran"
-
-    # Set Fortran optimization flags:
-    ENV["FFLAGS"] = ENV["FCFLAGS"] = ENV["CFLAGS"]
-
-Following these guidelines will allow Fortran-based brews to be easily edited so
-that alternate Fortran compilers, such as ifort, can be used instead of the
-version of gfortran provided by Homebrew.
-    EOS
+      EOS
   end
 end
