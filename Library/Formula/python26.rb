@@ -1,6 +1,6 @@
 require 'formula'
 
-# This formula for Python 2.6.4
+# This formula for Python 2.6.7
 # Based on Python 2.7.1 formula at:
 # https://github.com/mxcl/homebrew/blob/master/Library/Formula/python.rb
 
@@ -19,9 +19,9 @@ def as_framework?
 end
 
 class Python26 < Formula
-  url 'http://www.python.org/ftp/python/2.6.4/Python-2.6.4.tar.bz2'
+  url 'http://www.python.org/ftp/python/2.6.7/Python-2.6.7.tar.bz2'
   homepage 'http://www.python.org/'
-  md5 'fee5408634a54e721a93531aba37f8c1'
+  md5 'd40ef58ed88438a870bbeb0ac5d4217b'
 
   depends_on 'readline' => :optional # Prefer over OS X's libedit
   depends_on 'sqlite'   => :optional # Prefer over OS X's older version
