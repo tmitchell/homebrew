@@ -11,8 +11,9 @@ class Geos < Formula
 
   fails_with_llvm "Some symbols are missing during link step."
 
-  def install
+def install
     ENV.O3
+    ENV.gcc_4_2
     system "./configure", "--prefix=#{prefix}", "--disable-debug", "--disable-dependency-tracking"
     system "make install"
   end
