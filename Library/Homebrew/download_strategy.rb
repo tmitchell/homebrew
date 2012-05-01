@@ -96,7 +96,7 @@ class CurlDownloadStrategy < AbstractDownloadStrategy
     when '____pkg'
       safe_system '/usr/sbin/pkgutil', '--expand', @tarball_path, File.basename(@url)
       chdir
-    when 'Rar!'
+    when /Rar!/
       quiet_safe_system 'unrar', 'x', {:quiet_flag => '-inul'}, @tarball_path
     else
       # we are assuming it is not an archive, use original filename
@@ -194,8 +194,10 @@ class CurlBottleDownloadStrategy < CurlDownloadStrategy
     @tarball_path = HOMEBREW_CACHE/"#{name}-#{version}#{ext}"
 
     unless @tarball_path.exist?
+      # Stop people redownloading bottles just because I (Mike) was stupid.
       old_bottle_path = HOMEBREW_CACHE/"#{name}-#{version}-bottle.tar.gz"
       old_bottle_path = HOMEBREW_CACHE/"#{name}-#{version}.#{MacOS.cat}.bottle-bottle.tar.gz" unless old_bottle_path.exist?
+      old_bottle_path = HOMEBREW_CACHE/"#{name}-#{version}-7.#{MacOS.cat}.bottle.tar.gz" unless old_bottle_path.exist? or name != "imagemagick"
       FileUtils.mv old_bottle_path, @tarball_path if old_bottle_path.exist?
     end
   end
@@ -353,7 +355,7 @@ class GitDownloadStrategy < AbstractDownloadStrategy
       git_args = %w(git clone)
       git_args << "--depth" << "1" if support_depth?
       git_args << @url << @clone
-      safe_system *git_args
+      safe_system(*git_args)
     else
       puts "Updating #{@clone}"
       Dir.chdir(@clone) do

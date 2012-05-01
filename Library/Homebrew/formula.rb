@@ -61,6 +61,8 @@ class Formula
     CHECKSUM_TYPES.each { |type| set_instance_variable type }
 
     @downloader = download_strategy.new @spec_to_use.url, name, version, @spec_to_use.specs
+
+    @bottle_url ||= bottle_base_url + bottle_filename(self) if @bottle_sha1
   end
 
   # if the dir is there, but it's empty we consider it not installed
@@ -590,14 +592,14 @@ private
 
     def stable &block
       raise "url and md5 must be specified in a block" unless block_given?
-      instance_eval &block unless ARGV.build_devel? or ARGV.build_head?
+      instance_eval(&block) unless ARGV.build_devel? or ARGV.build_head?
     end
 
     def devel &block
       raise "url and md5 must be specified in a block" unless block_given?
       if ARGV.build_devel?
         @mirrors = nil # clear out mirrors from the stable release
-        instance_eval &block
+        instance_eval(&block)
       end
     end
 
@@ -630,9 +632,8 @@ private
         end
       end
 
-      bottle_block.instance_eval &block
+      bottle_block.instance_eval(&block)
       @bottle_version, @bottle_url, @bottle_sha1 = bottle_block.data
-      @bottle_url ||= bottle_base_url + bottle_filename(self) if @bottle_sha1
     end
 
     def mirror val, specs=nil
