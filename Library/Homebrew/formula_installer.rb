@@ -1,7 +1,6 @@
 require 'exceptions'
 require 'formula'
 require 'keg'
-require 'set'
 require 'tab'
 require 'bottles'
 
@@ -43,7 +42,8 @@ class FormulaInstaller
 
     f.recursive_deps.each do |dep|
       if dep.installed? and not dep.keg_only? and not dep.linked_keg.directory?
-        raise CannotInstallFormulaError, "You must `brew link #{dep}' before #{f} can be installed"
+        raise CannotInstallFormulaError,
+              "You must `brew link #{dep}' before #{f} can be installed"
       end
     end unless ignore_deps
 
@@ -66,16 +66,14 @@ class FormulaInstaller
       EOS
     end
 
-    f.external_deps.each do |dep|
-      unless dep.satisfied?
-        puts dep.message
-        if dep.fatal? and not ignore_deps
-          raise UnsatisfiedRequirement.new(f, dep)
-        end
-      end
-    end
-
     unless ignore_deps
+      needed_reqs = f.recursive_requirements.reject { |r| r.satisfied? }
+      puts needed_reqs.map { |r| r.message } * "\n" unless needed_reqs.empty?
+      unsatisfied_fatals = needed_reqs.select { |r| r.fatal? }
+      unless unsatisfied_fatals.empty?
+        raise UnsatisfiedRequirements.new(f, unsatisfied_fatals)
+      end
+
       needed_deps = f.recursive_deps.reject{ |d| d.installed? }
       unless needed_deps.empty?
         needed_deps.each do |dep|
@@ -109,7 +107,7 @@ class FormulaInstaller
       clean
     end
 
-    raise "Nothing was installed to #{f.prefix}" unless f.installed?
+    opoo "Nothing was installed to #{f.prefix}" unless f.installed?
   end
 
   def install_dependency dep
@@ -130,8 +128,7 @@ class FormulaInstaller
   end
 
   def caveats
-    the_caveats = (f.caveats || "").strip
-    unless the_caveats.empty?
+    unless f.caveats.to_s.strip.empty?
       ohai "Caveats", f.caveats
       @show_summary_heading = true
     end
@@ -146,6 +143,22 @@ class FormulaInstaller
       check_manpages
       check_infopages
       check_m4
+    end
+
+    keg = Keg.new(f.prefix)
+
+    if keg.completion_installed? :bash
+      ohai 'Caveats', <<-EOS.undent
+        Bash completion has been installed to:
+          #{HOMEBREW_PREFIX}/etc/bash_completion.d
+        EOS
+    end
+
+    if keg.completion_installed? :zsh
+      ohai 'Caveats', <<-EOS.undent
+        zsh completion has been installed to:
+          #{HOMEBREW_PREFIX}/share/zsh/site-functions
+        EOS
     end
   end
 
@@ -215,10 +228,23 @@ class FormulaInstaller
       data = read.read
       raise Marshal.load(data) unless data.nil? or data.empty?
       raise "Suspicious installation failure" unless $?.success?
-
-      # Write an installation receipt (a Tab) to the prefix
-      Tab.for_install(f, args).write if f.installed?
     end
+
+    # This is the installation receipt. The reason this comment is necessary
+    # is because some numpty decided to call the class Tab rather than
+    # the far more appropriate InstallationReceipt :P
+    Tab.for_install(f, args).write
+
+  rescue Exception => e
+    ignore_interrupts do
+      # any exceptions must leave us with nothing installed
+      if f.prefix.directory?
+        puts "One sec, just cleaning up..." if e.kind_of? Interrupt
+        f.prefix.rmtree
+      end
+      f.rack.rmdir_if_possible
+    end
+    raise
   end
 
   def link
@@ -400,7 +426,7 @@ end
 class Formula
   def keg_only_text
     # Add indent into reason so undent won't truncate the beginnings of lines
-    reason = self.keg_only?.to_s.gsub(/[\n]/, "\n    ")
+    reason = self.keg_only_reason.to_s.gsub(/[\n]/, "\n    ")
     return <<-EOS.undent
     This formula is keg-only, so it was not symlinked into #{HOMEBREW_PREFIX}.
 
