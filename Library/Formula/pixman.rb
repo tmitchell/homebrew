@@ -2,7 +2,7 @@ require 'formula'
 
 class Pixman < Formula
   homepage 'http://cairographics.org/'
-  url 'http://cairographics.org/releases/pixman-0.26.2.tar.gz'
+  url 'http://ftp.lfs-matrix.net/pub/blfs/svn/p/pixman-0.26.2.tar.gz'
   sha256 'c9ab554b5160679d958bfa1753cb9e6edd1e53c4745c963a1394eea4f0b13ce2'
 
   depends_on 'pkg-config' => :build
