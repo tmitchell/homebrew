@@ -2,7 +2,7 @@ require 'formula'
 
 class Cairo < Formula
   homepage 'http://cairographics.org/'
-  url 'http://cairographics.org/releases/cairo-1.12.2.tar.xz'
+  url 'http://ftp.debian.org/debian/pool/main/c/cairo/cairo_1.12.2.orig.tar.xz'
   sha256 'b786bc4a70542bcb09f2d9d13e5e6a0c86408cbf6d1edde5f0de807eecf93f96'
 
   keg_only :when_xquartz_installed
