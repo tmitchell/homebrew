@@ -76,7 +76,7 @@ class Erlang < Formula
             "--enable-shared-zlib",
             "--enable-smp-support"]
 
-    args << "--with-dynamic-trace=dtrace" unless MacOS.leopard?
+    args << "--with-dynamic-trace=dtrace" unless MacOS.version == :leopard
 
     unless build.include? 'disable-hipe'
       # HIPE doesn't strike me as that reliable on OS X
@@ -91,7 +91,7 @@ class Erlang < Formula
     end
 
     system "./configure", *args
-    system "touch lib/wx/SKIP" if MacOS.snow_leopard?
+    touch 'lib/wx/SKIP' if MacOS.version >= :snow_leopard
     ENV.j1 # Parallel builds not working again as of at least R15B01
     system "make"
     system "make install"
